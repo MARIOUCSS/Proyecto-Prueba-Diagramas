@@ -86,6 +86,7 @@ export const GlobalCartContext = (props) => {
       toast.success(data.message);
       fetchCart();
       console.log("Producto agregado:", data);
+      //modificaciones para la prueba
     } catch (error) {
       console.error("Error completo:", error);
 
