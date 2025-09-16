@@ -9,7 +9,7 @@ const { RequireSignIn } = require("../Middleware/Authidleware");
 const router = express.Router();
 
 router.post("/cartN/new", RequireSignIn, AddToCart);
-router.delete("/cart/remove/:id", RequireSignIn, RemoveItemcart);
-router.post("/cart/update", RequireSignIn, UpdateCart);
+router.delete("/cartD/remove/:id", RequireSignIn, RemoveItemcart);
+router.post("/cartU/update", RequireSignIn, UpdateCart);
 router.get("/carT/all", RequireSignIn, FetchCart);
 module.exports = router;

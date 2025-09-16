@@ -17,7 +17,7 @@ export const CartGlobalState = () => {
 
 // 3. Componente Provider (SÍ necesita PropTypes)
 export const GlobalCartContext = (props) => {
-  const token = Cookies.get("token");
+  //const token = Cookies.get("token");
   //const [loading, setloading] = useState(false);
   const [totalItem, settotalItem] = useState(0);
   const [subtotal, setsubtotal] = useState(0);
@@ -32,6 +32,7 @@ export const GlobalCartContext = (props) => {
       //   },
       //   // withCredentials: true,
       // });
+      const token = Cookies.get("token");
       const { data } = await axios.get(`${url}/cart/carT/all`, {
         headers: {
           Authorization: `Bearer ${token}`, // ✅ FORMATO CORRECTO
@@ -45,6 +46,61 @@ export const GlobalCartContext = (props) => {
       console.log(error);
     }
   };
+  const RemoveCart = async (id) => {
+    try {
+      const token = Cookies.get("token");
+      const { data } = await axios.delete(`${url}/cart/cartD/remove/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ FORMATO CORRECTO
+        },
+      });
+      toast.success(data.message);
+      fetchCart();
+    } catch (error) {
+      console.error("Error completo:", error);
+
+      // Manejo específico de errores
+      if (error.response?.status === 401) {
+        toast.error("Sesión expirada. Por favor inicia sesión nuevamente.");
+        // Limpiar token expirado
+        Cookies.remove("token");
+      } else if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Error al agregar al carrito");
+      }
+    }
+  };
+  const UpdateCart = async (id, action) => {
+    try {
+      const token = Cookies.get("token");
+      const { data } = await axios.post(
+        `${url}/cart/cartU/update?action=${action}`,
+        { id },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // ✅ FORMATO CORRECTO
+          },
+        }
+      );
+      toast.success(data.message);
+      fetchCart();
+    } catch (error) {
+      console.error("Error completo:", error);
+
+      // Manejo específico de errores
+      if (error.response?.status === 401) {
+        toast.error("Sesión expirada. Por favor inicia sesión nuevamente.");
+        // Limpiar token expirado
+        Cookies.remove("token");
+      } else if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Error al agregar al carrito");
+      }
+    }
+  };
+
   // const AddtoCart = async (product) => {
   //   try {
   //     const { data } = await axios.post(
@@ -86,9 +142,6 @@ export const GlobalCartContext = (props) => {
       toast.success(data.message);
       fetchCart();
       console.log("Producto agregado:", data);
-      //modificaciones para la prueba
-      //segunda modifivcacion
-      //tercera modificacion
     } catch (error) {
       console.error("Error completo:", error);
 
@@ -109,7 +162,16 @@ export const GlobalCartContext = (props) => {
   }, []);
   return (
     <Contextc.Provider
-      value={{ subtotal, totalItem, cart, fetchCart, AddtoCart, settotalItem }}
+      value={{
+        subtotal,
+        totalItem,
+        cart,
+        fetchCart,
+        AddtoCart,
+        settotalItem,
+        UpdateCart,
+        RemoveCart,
+      }}
     >
       {props.children}
     </Contextc.Provider>
