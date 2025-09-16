@@ -88,6 +88,7 @@ export const GlobalCartContext = (props) => {
       console.log("Producto agregado:", data);
       //modificaciones para la prueba
       //segunda modifivcacion
+      //tercera modificacion
     } catch (error) {
       console.error("Error completo:", error);
 
