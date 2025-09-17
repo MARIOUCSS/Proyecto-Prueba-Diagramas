@@ -9,6 +9,7 @@ import { UseGlobalState } from "./Context/Usercontext";
 import Products from "./pages/Products";
 import Productsdesc from "./pages/Productsdesc";
 import { Cart } from "./pages/Cart";
+import Checkout from "./pages/Checkout";
 
 function App() {
   const { isauth } = UseGlobalState();
@@ -22,6 +23,10 @@ function App() {
           {/* //Si ya esta autenticado isauth es true  y quieres volver a login no podras !! */}
           <Route path="/login" element={isauth ? <Home /> : <Login />} />
           <Route path="/verify" element={isauth ? <Home /> : <Verify />} />
+          <Route
+            path="/checkout"
+            element={isauth ? <Checkout /> : <Verify />}
+          />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:id" element={<Productsdesc />} />
           <Route path="/cart" element={<Cart />} />

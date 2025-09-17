@@ -9,7 +9,8 @@ export const Cart = () => {
     cart,
 
     AddtoCart,
-
+    subtotal,
+    totalItem,
     UpdateCart,
     RemoveCart,
   } = CartGlobalState();
@@ -47,7 +48,8 @@ export const Cart = () => {
                   src={x.product.Images[0].url}
                   alt={x.product.title}
                   className="w-full sm:w-20 sm:h-20 object-cover rounded-md cursor-pointer"
-                  onClick={() => navigate(`product/${x.product._id}`)}
+                  onClick={() => navigate(`/products/${x.product._id}`)}
+                  // <Route path="/products/:id" element={<Productsdesc />} />
                 />
                 {/* //este flex-1 abarca o crece lo mas que epueda */}
                 <div className="flex-1 text-center sm:text-left ">
@@ -81,12 +83,42 @@ export const Cart = () => {
               </div>
             ))}
           </div>
-          <div className="col-span-1 shadow-lg rounded-lg border border-gray-400">
+          <div className="col-span-1 shadow-lg rounded-lg border border-gray-400 max-h-[350px] lg:max-h-[240px] px-1">
             <h2 className="text-xl font-semibold mb-4 text-center lg:text-left">
               Order Summary
             </h2>
-            <hr class="border-t border-gray-400 my-5" />
+            <hr className="border-t border-gray-400 my-5" />
             {/* minuto 30 */}
+            <div className="space-y-2 ">
+              <div className="flex justify-between text-md font-semibold px-2">
+                <span>Total Items - {totalItem}</span>
+                <span>
+                  Total Price - $/.{" "}
+                  {subtotal.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+              </div>
+            </div>
+            <hr className="border-t border-gray-400 my-5" />
+            <div className="flex justify-between font-medium text-lg">
+              <span>Total :</span>
+              <span>
+                Total Price - $/.{" "}
+                {subtotal.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
+            </div>
+            <Button
+              className="w-full mt-6"
+              disabled={cart.length === 0}
+              onClick={() => navigate("/checkout")}
+            >
+              Checkout{" "}
+            </Button>
           </div>
         </div>
       )}
