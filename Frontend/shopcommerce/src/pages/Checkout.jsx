@@ -6,6 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { Loader, Trash } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { Link } from "react-router-dom";
+import Modal from "../components/ui/Modal";
 function Checkout() {
   const [address, setaddress] = useState([]);
   const [loading, setloading] = useState(true);
@@ -39,12 +40,55 @@ function Checkout() {
       }
     }
   };
-  const [isModalOpen, setisModalOpen] = useState(false);
-  const [modalOpen, setmodalOpen] = useState(false);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [newAddress, setnewAddress] = useState({
     address: "",
     phone: "",
   });
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setnewAddress((prev) => ({ ...prev, [name]: value }));
+  };
+  const HandelOpenModal = () => {
+    setIsModalOpen(true);
+  };
+  const HandelCloseModal = () => {
+    setIsModalOpen(false);
+  };
+  const DeleteHandler = async (id) => {
+    try {
+      const token = Cookies.get("token");
+      if (!token) {
+        toast.error("No estás autenticado. Inicia sesión primero.");
+        return;
+      }
+
+      const { data } = await axios.delete(
+        `${url}/Address/address/DeleteAddress/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // ✅ FORMATO CORRECTO
+          },
+        }
+      );
+      toast.success(data.message);
+      fetchAddress();
+    } catch (error) {
+      console.error("Error completo:", error);
+      //setloading(false);
+      // Manejo específico de errores
+      if (error.response?.status === 401) {
+        toast.error("Sesión expirada. Por favor inicia sesión nuevamente.");
+        // Limpiar token expirado
+        Cookies.remove("token");
+      } else if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Error al agregar al carrito");
+      }
+    }
+  };
   const handleAddress = async () => {
     try {
       const token = Cookies.get("token");
@@ -67,7 +111,7 @@ function Checkout() {
           address: "",
           phone: "",
         });
-        setmodalOpen(false);
+        setIsModalOpen(false);
       }
     } catch (error) {
       console.error("Error completo:", error);
@@ -84,6 +128,7 @@ function Checkout() {
       }
     }
   };
+
   useEffect(() => {
     fetchAddress();
   }, []);
@@ -108,13 +153,16 @@ function Checkout() {
         //     </div>
         //   )}
         // </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-2">
           {address && address.length > 0 ? (
             address.map((x) => (
               <div className="p-4 border rounded-lg shadow-sm" key={x._id}>
                 <h3 className="text-lg font-semibold flex justify-between">
                   Address - {x.address}
-                  <Button variant="destructive">
+                  <Button
+                    variant="destructive"
+                    onClick={() => DeleteHandler(x._id)}
+                  >
                     <Trash />
                   </Button>
                 </h3>
@@ -131,13 +179,17 @@ function Checkout() {
           )}
         </div>
       )}
-      <Button
-        className="mt-6"
-        variant="outline"
-        onClick={() => setmodalOpen(true)}
-      >
+      {/* //Primero f ahora cuando aprieta se vuelve verdadero v */}
+      <Button className="mt-6" variant="outline" onClick={HandelOpenModal}>
         Add New Address
       </Button>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={HandelCloseModal}
+        onSubmit={handleAddress}
+        formData={newAddress}
+        onInputChange={handleInputChange}
+      />
     </div>
   );
 }
