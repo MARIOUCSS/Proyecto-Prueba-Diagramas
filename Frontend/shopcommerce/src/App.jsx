@@ -10,6 +10,7 @@ import Products from "./pages/Products";
 import Productsdesc from "./pages/Productsdesc";
 import { Cart } from "./pages/Cart";
 import Checkout from "./pages/Checkout";
+import Order from "./pages/Order";
 
 function App() {
   const { isauth } = UseGlobalState();
@@ -23,6 +24,7 @@ function App() {
           {/* //Si ya esta autenticado isauth es true  y quieres volver a login no podras !! */}
           <Route path="/login" element={isauth ? <Home /> : <Login />} />
           <Route path="/verify" element={isauth ? <Home /> : <Verify />} />
+          <Route path="/order" element={isauth ? <Order /> : <Login />} />
           <Route
             path="/checkout"
             element={isauth ? <Checkout /> : <Verify />}

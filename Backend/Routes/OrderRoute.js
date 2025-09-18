@@ -11,7 +11,7 @@ const { RequireSignIn, IsAdmin } = require("../Middleware/Authidleware");
 
 const router = express.Router();
 router.post("/orders/new", RequireSignIn, newOrderCO);
-router.post("/orders/ordersAll", RequireSignIn, getAllorders);
+router.get("/orders/ordersAll", RequireSignIn, getAllorders);
 router.get("/orders/ordersAllAdmin", RequireSignIn, IsAdmin, getallordersAdmin);
 router.get("/orders/getMyorder", RequireSignIn, getMyOrder);
 router.post("/orders/updateMyorder/:id", RequireSignIn, IsAdmin, updateStatus);
