@@ -11,6 +11,7 @@ import Productsdesc from "./pages/Productsdesc";
 import { Cart } from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Order from "./pages/Order";
+import Payment from "./pages/Payment";
 
 function App() {
   const { isauth } = UseGlobalState();
@@ -28,6 +29,10 @@ function App() {
           <Route
             path="/checkout"
             element={isauth ? <Checkout /> : <Verify />}
+          />
+          <Route
+            path="/payment/:id"
+            element={isauth ? <Payment /> : <Verify />}
           />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:id" element={<Productsdesc />} />
