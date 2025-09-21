@@ -2,6 +2,9 @@ const Cart = require("../Models/Cart");
 const Order = require("../Models/Order");
 const Product = require("../Models/Product");
 const sendOrderConfirmation = require("../Utils/sendOrder");
+const Stripe = require("stripe");
+require("dotenv").config();
+const stripe = Stripe(process.env.STRIPE_KEY);
 
 const newOrderCO = async (req, res) => {
   try {
@@ -125,6 +128,53 @@ const getStats = async (req, res) => {
     });
   } catch (error) {}
 };
+const NewOrderOnline = async (req, res) => {
+  try {
+    //   const cart = await Cart.find({ user: req.user._id }).populate({
+    //   path: "product",
+    //   select: "title price",
+    // });
+    const { method, phone, address } = req.body;
+    const cart = await Cart.find({ user: req.user._id }).populate("products");
+    if (!cart.length) {
+      return res.status(400).send({
+        message: "Cart is empty",
+      });
+    }
+    const subTotal = cart.reduce(
+      (total, item) => total + item.product.price * item.quantity,
+      0
+    );
+    const line_items = cart.map((item) => {
+      return {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: item.product.title,
+            images: [item.product.Images[0].url],
+
+            description: item.product.description,
+            metadata: {
+              id: item._id,
+            },
+          },
+
+          unit_amount: Math.round(item.product.price * 100),
+        },
+        quantity: item.quantity,
+      };
+    });
+
+    ///
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items,
+      mode: "payment",
+      success_url: `${process.env.CLIENT_URL}/checkout-success`,
+      cancel_url: `${process.env.CLIENT_URL}/cart`,
+    });
+  } catch (error) {}
+};
 module.exports = {
   newOrderCO,
   getAllorders,
@@ -132,5 +182,6 @@ module.exports = {
   getMyOrder,
   updateStatus,
   getStats,
+  NewOrderOnline,
 };
 //27:49
