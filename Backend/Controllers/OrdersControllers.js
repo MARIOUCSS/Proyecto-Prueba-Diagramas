@@ -1,8 +1,10 @@
+const { resolve } = require("path");
 const Cart = require("../Models/Cart");
 const Order = require("../Models/Order");
 const Product = require("../Models/Product");
 const sendOrderConfirmation = require("../Utils/sendOrder");
 const Stripe = require("stripe");
+const Order = require("../Models/Order");
 require("dotenv").config();
 const stripe = Stripe(process.env.STRIPE_KEY);
 
@@ -141,7 +143,7 @@ const NewOrderOnline = async (req, res) => {
         message: "Cart is empty",
       });
     }
-    const subTotal = cart.reduce(
+    const subtotal = cart.reduce(
       (total, item) => total + item.product.price * item.quantity,
       0
     );
@@ -154,9 +156,9 @@ const NewOrderOnline = async (req, res) => {
             images: [item.product.Images[0].url],
 
             description: item.product.description,
-            metadata: {
-              id: item._id,
-            },
+            // metadata: {
+            //   id: item._id,
+            // },
           },
 
           unit_amount: Math.round(item.product.price * 100),
@@ -172,7 +174,79 @@ const NewOrderOnline = async (req, res) => {
       mode: "payment",
       success_url: `${process.env.CLIENT_URL}/checkout-success`,
       cancel_url: `${process.env.CLIENT_URL}/cart`,
+      metadata: {
+        userId: req.user._id.toString(),
+        method,
+        phone,
+        address,
+        subtotal,
+      },
     });
+    //
+    return res.send({ url: session.url });
+  } catch (error) {
+    console.log("Error creating Stripe session:", error.message);
+    res.status(500).json({
+      message: "Failed to create payment session",
+    });
+  }
+};
+const VerifyPayment = async (req, res) => {
+  try {
+    const { sessionId } = req.body;
+    const session = await stripe.checkout.sessions.retrive(sessionId);
+    const { userId, method, phone, address, subtotal } = session.metadata;
+    const cart = await Cart.find({ user: userId }).populate("product");
+    const items = cart.map((x) => ({
+      product: x.product._id,
+      name: x.product.title,
+      price: x.product.price,
+      quantity: x.quantity,
+    }));
+    if (cart.length === 0) {
+      return res.status(400).send({
+        message: "Cart is empty",
+      });
+    }
+    //Existe alguna order ?
+    const ExistengOrder = await Order.findOne({ paymentInfo: sessionId });
+    if (!ExistengOrder) {
+      const Order = await Order.create({
+        items: cart.map((x) => ({
+          product: x.product._id,
+          quantity: x.quantity,
+        })),
+        method,
+        user: userId,
+        phone,
+        address,
+        subtotal,
+        paidAt: new Date(),
+        paymentInfo: sessionId,
+      });
+      //
+      for (let i of Order.items) {
+        const product = await Product.findById(i.product);
+        if (product) {
+          product.stock -= i.quantity;
+          product.sold += i.quantity;
+        }
+      }
+      //Eliminame todos los documentos que cumplan estan condicion
+      await Cart.deleteMany({ user: req.user._id });
+      //Enviar correo con la compra
+      //      email,
+      // subject,
+      // orderId,
+      // products,
+      // totalAmount,
+      await sendOrderConfirmation({});
+      return res.status(201).send({
+        success: true,
+        message: "Order Created Successfully",
+        Order,
+      });
+    }
   } catch (error) {}
 };
 module.exports = {
@@ -183,5 +257,6 @@ module.exports = {
   updateStatus,
   getStats,
   NewOrderOnline,
+  VerifyPayment,
 };
 //27:49
