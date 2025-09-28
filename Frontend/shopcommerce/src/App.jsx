@@ -12,6 +12,7 @@ import { Cart } from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Order from "./pages/Order";
 import Payment from "./pages/Payment";
+import OrderProcessing from "./pages/OrderProcessing";
 
 function App() {
   const { isauth } = UseGlobalState();
@@ -26,6 +27,10 @@ function App() {
           <Route path="/login" element={isauth ? <Home /> : <Login />} />
           <Route path="/verify" element={isauth ? <Home /> : <Verify />} />
           <Route path="/order" element={isauth ? <Order /> : <Login />} />
+          <Route
+            path="/ordersuccess/"
+            element={isauth ? <OrderProcessing /> : <Login />}
+          />
           <Route
             path="/checkout"
             element={isauth ? <Checkout /> : <Verify />}

@@ -7,6 +7,8 @@ import axios from "axios";
 import { url } from "../Context/auth";
 import { Loader, Trash } from "lucide-react";
 import { Button } from "../components/ui/Button";
+//import { loadStripe } from "@stripe/stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 function Payment() {
   const { subtotal, cart, fetchCart } = CartGlobalState();
   const [address, setaddress] = useState("");
@@ -22,7 +24,7 @@ function Payment() {
       try {
         const token = Cookies.get("token");
         const { data } = await axios.post(
-          `${url}/{aca falta la url}`,
+          `${url}/order/Order/verify/payment`,
           {
             method,
             phone: address.Singleaddress.phone,
@@ -38,6 +40,54 @@ function Payment() {
         toast.success(data.message);
         fetchCart();
         navigate("/order");
+      } catch (error) {
+        console.error("Error completo:", error);
+        // setloading(false);
+        // Manejo específico de errores
+        if (error.response?.status === 401) {
+          toast.error("Sesión expirada. Por favor inicia sesión nuevamente.");
+          // Limpiar token expirado
+          Cookies.remove("token");
+        } else if (error.response?.data?.message) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error("Error al agregar al carrito");
+        }
+      }
+    }
+    if (method === "online") {
+      const stripePromise = loadStripe(
+        "pk_test_51S9DsQLksx2j7Pe0GutltwndF1OZiehPMaRqiKUZ0RGhNp2Ca9Gc2o3Zj7l7WrQEhjl9yNvHuLsZFIKyO6T4nVDr00mkbyO1rt"
+      );
+      try {
+        setloading(true);
+        const token = Cookies.get("token");
+        // const stripe = await stripePromise;
+        await stripePromise;
+        //const stripe = await stripePromise;
+        const { data } = await axios.post(
+          `${url}/order/Order/new/online`,
+          // Order/new/online
+          {
+            method,
+            phone: address.Singleaddress.phone,
+            address: address.Singleaddress.address,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // ✅ FORMATO CORRECTO
+            },
+          }
+        );
+        if (data.url) {
+          //aca te manda ;
+          // http://localhost:5173/ordersuccess?session_id=cs_test_a1k7Gziz1ZrpPryEILmmRmCaxLUV5VbZgdsukfu84SZ0F2rWUZgEPMzfzn
+          window.location.href = data.url;
+          setloading(false);
+        } else {
+          toast.error("Failed to created Payment Session");
+          setloading(false);
+        }
       } catch (error) {
         console.error("Error completo:", error);
         // setloading(false);

@@ -62,7 +62,7 @@ const VerifyUser = async (req, res) => {
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: "7d",
+        expiresIn: "8d",
       }
     );
     await haveOtp.deleteOne();

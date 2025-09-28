@@ -6,6 +6,8 @@ const {
   getMyOrder,
   updateStatus,
   getStats,
+  VerifyPayment,
+  NewOrderOnline,
 } = require("../Controllers/OrdersControllers");
 const { RequireSignIn, IsAdmin } = require("../Middleware/Authidleware");
 
@@ -16,4 +18,7 @@ router.get("/orders/ordersAllAdmin", RequireSignIn, IsAdmin, getallordersAdmin);
 router.get("/orders/getMyorder", RequireSignIn, getMyOrder);
 router.post("/orders/updateMyorder/:id", RequireSignIn, IsAdmin, updateStatus);
 router.get("/orders/getStats", RequireSignIn, getStats);
+router.post("/Order/new/online", RequireSignIn, NewOrderOnline);
+
+router.post("/Order/verify/payment", RequireSignIn, VerifyPayment);
 module.exports = router;

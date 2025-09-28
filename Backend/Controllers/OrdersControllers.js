@@ -1,6 +1,6 @@
 const { resolve } = require("path");
 const Cart = require("../Models/Cart");
-const Order = require("../Models/Order");
+
 const Product = require("../Models/Product");
 const sendOrderConfirmation = require("../Utils/sendOrder");
 const Stripe = require("stripe");
@@ -137,7 +137,7 @@ const NewOrderOnline = async (req, res) => {
     //   select: "title price",
     // });
     const { method, phone, address } = req.body;
-    const cart = await Cart.find({ user: req.user._id }).populate("products");
+    const cart = await Cart.find({ user: req.user._id }).populate("product");
     if (!cart.length) {
       return res.status(400).send({
         message: "Cart is empty",
@@ -172,7 +172,8 @@ const NewOrderOnline = async (req, res) => {
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
-      success_url: `${process.env.CLIENT_URL}/checkout-success`,
+      //success_url: `${process.env.CLIENT_URL}/checkout-success`,
+      success_url: `${process.env.CLIENT_URL}/ordersuccess?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.CLIENT_URL}/cart`,
       metadata: {
         userId: req.user._id.toString(),
@@ -185,16 +186,18 @@ const NewOrderOnline = async (req, res) => {
     //
     return res.send({ url: session.url });
   } catch (error) {
-    console.log("Error creating Stripe session:", error.message);
+    console.error("Error creating Stripe session:", error); // 👈 imprime TODO
     res.status(500).json({
-      message: "Failed to create payment session",
+      success: false,
+      message: error.message || "Failed to create payment session",
+      stack: error.stack, // 👈 opcional para ver dónde explota
     });
   }
 };
 const VerifyPayment = async (req, res) => {
   try {
     const { sessionId } = req.body;
-    const session = await stripe.checkout.sessions.retrive(sessionId);
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
     const { userId, method, phone, address, subtotal } = session.metadata;
     const cart = await Cart.find({ user: userId }).populate("product");
     const items = cart.map((x) => ({
@@ -211,7 +214,7 @@ const VerifyPayment = async (req, res) => {
     //Existe alguna order ?
     const ExistengOrder = await Order.findOne({ paymentInfo: sessionId });
     if (!ExistengOrder) {
-      const Order = await Order.create({
+      const Orders = await Order.create({
         items: cart.map((x) => ({
           product: x.product._id,
           quantity: x.quantity,
@@ -225,11 +228,12 @@ const VerifyPayment = async (req, res) => {
         paymentInfo: sessionId,
       });
       //
-      for (let i of Order.items) {
+      for (let i of Orders.items) {
         const product = await Product.findById(i.product);
         if (product) {
           product.stock -= i.quantity;
           product.sold += i.quantity;
+          await product.save();
         }
       }
       //Eliminame todos los documentos que cumplan estan condicion
@@ -240,14 +244,22 @@ const VerifyPayment = async (req, res) => {
       // orderId,
       // products,
       // totalAmount,
-      await sendOrderConfirmation({});
+      await sendOrderConfirmation({
+        email: req.user.email,
+        subject: "Order Confirmation",
+        orderId: Order._id,
+        products: items,
+        totalAmount: subtotal,
+      });
       return res.status(201).send({
         success: true,
         message: "Order Created Successfully",
-        Order,
+        Orders,
       });
     }
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  }
 };
 module.exports = {
   newOrderCO,
