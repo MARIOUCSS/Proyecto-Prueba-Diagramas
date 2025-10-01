@@ -21,7 +21,7 @@ function Navbar() {
   const [isauth, setIsauth] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const { LogoutUser } = UseGlobalState();
+  const { LogoutUser, user } = UseGlobalState();
   const { totalItem, settotalItem } = CartGlobalState();
   const Navigate = useNavigate();
   const logouthandler = () => {
@@ -125,6 +125,24 @@ function Navbar() {
                     >
                       Your Order
                     </DropdownMenuItem>
+
+                    {user && user.role === "Admin" && (
+                      <DropdownMenuItem
+                        className={`
+  text-sm          // Tamaño de texto
+  px-2 py-1.5      // Padding
+  rounded-sm       // Bordes redondeados
+  cursor-pointer   // Cursor tipo 
+  outline-none     // Elimina el borde al enfocar
+  hover:bg-gray-100 // Fondo al hover
+  focus:bg-gray-100 // Fondo al enfocar (accesibilidad)
+                      `}
+                        onClick={() => Navigate("/admin/dashboard")}
+                      >
+                        Dashboard
+                      </DropdownMenuItem>
+                    )}
+
                     <DropdownMenuItem
                       className={`
   text-sm          // Tamaño de texto

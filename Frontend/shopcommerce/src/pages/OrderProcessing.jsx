@@ -57,7 +57,7 @@ function OrderProcessing() {
           fetchCart();
 
           setTimeout(() => {
-            navigate("/orders");
+            navigate("/order");
           }, 1000);
         }
       } catch (error) {

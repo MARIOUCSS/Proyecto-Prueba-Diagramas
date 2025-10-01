@@ -5,9 +5,28 @@ const Product = require("../Models/Product");
 const sendOrderConfirmation = require("../Utils/sendOrder");
 const Stripe = require("stripe");
 const Order = require("../Models/Order");
+//const Order = require("../Models/Order");
 require("dotenv").config();
 const stripe = Stripe(process.env.STRIPE_KEY);
-
+const getOrderId = async (req, res) => {
+  try {
+    const OrderU = await Order.findById(req.params.id).populate({
+      path: "items.product",
+      select: "Images price",
+    });
+    if (!OrderU) return res.status(200).send({ message: "Order not found" });
+    return res.status(200).send({
+      message: "Order obtained",
+      OrderU,
+    });
+  } catch (error) {
+    console.error("Error in GetSingleOrder:", error);
+    res.status(500).json({
+      message: "Error retrieving Order",
+      error: error.message,
+    });
+  }
+};
 const newOrderCO = async (req, res) => {
   try {
     //OJO
@@ -270,5 +289,6 @@ module.exports = {
   getStats,
   NewOrderOnline,
   VerifyPayment,
+  getOrderId,
 };
 //27:49

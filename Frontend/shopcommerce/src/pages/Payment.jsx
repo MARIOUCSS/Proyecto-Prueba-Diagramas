@@ -17,14 +17,15 @@ function Payment() {
   const navigate = useNavigate();
   const { id } = useParams();
   const PaymentHandler = async () => {
-    console.log("hola");
+    //console.log("hola");
 
     if (method === "cod") {
       setloading(true);
       try {
         const token = Cookies.get("token");
+
         const { data } = await axios.post(
-          `${url}/order/Order/verify/payment`,
+          `${url}/order/orders/new`,
           {
             method,
             phone: address.Singleaddress.phone,
