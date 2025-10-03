@@ -6,6 +6,7 @@ const ModelProduct = ({
   onSubmit,
   formData,
   onInputChange,
+  handleFileChange,
 }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -56,19 +57,18 @@ const ModelProduct = ({
             />
           </div>
 
-          {/* Campo Teléfono */}
           <div>
             <label
               htmlFor="phone"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              About:
+              Description:
             </label>
             <input
               type="text"
               id="about"
-              name="about"
-              value={formData.about}
+              name="description"
+              value={formData.description}
               onChange={onInputChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -98,7 +98,6 @@ const ModelProduct = ({
               value={formData.category}
               onChange={onInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             >
               <option value={""}>Select Category</option>
               {categories.map((e) => {
@@ -155,13 +154,20 @@ const ModelProduct = ({
             </label>
             <input
               type="file"
+              multiple
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {/* <input
+              type="file"
               id="images"
               name="images"
               multiple
               onChange={onInputChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            /> */}
           </div>
           <div className="flex flex-row gap-x-1 justify-between">
             {/* <button

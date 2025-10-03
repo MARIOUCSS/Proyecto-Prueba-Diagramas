@@ -12,7 +12,12 @@ const {
 
 const uploadPhoto = require("../Middleware/Multer");
 
-router.post("/products/new", uploadPhoto.array("images", 10), CreateProduct); //auth
+router.post(
+  "/products/new",
+  RequireSignIn,
+  uploadPhoto.array("images", 10),
+  CreateProduct
+); //auth
 router.get("/product/all", GetAllProducts);
 router.get("/product/:id", GetSingleProduct);
 router.put("/product/:id", UpdateProduct);

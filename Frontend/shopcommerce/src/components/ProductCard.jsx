@@ -12,8 +12,15 @@ function ProductCard({ product, latest }) {
     <div>
       {/* {product?():null} para evitar esto mejor esto */}
       {product && (
+        //     <div className="overflow-hidden rounded-lg shadow-lg">
+        //   <img
+        //     src={images[currentIndex]}
+        //     alt={`Imagen ${currentIndex + 1}`}
+        //     className="w-full h-64 object-cover"
+        //   />
+        // </div>
         <div className="w-[450px] mx-auto relative border-gray-200 rounded-lg">
-          <Link to={`/products/${product?._id}`}>
+          <Link to={`/products/${product?._id}`} className="bg-red-200">
             <img
               src={product?.Images[0].url}
               alt="Product"

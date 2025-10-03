@@ -59,6 +59,7 @@ export const GlobalProviderProd = (props) => {
         product,
         related,
         fetchProduct,
+        fetchProducts,
       }}
     >
       {props.children}

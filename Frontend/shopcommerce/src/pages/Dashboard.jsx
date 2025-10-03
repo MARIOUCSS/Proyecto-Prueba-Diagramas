@@ -9,9 +9,14 @@ import { X } from "lucide-react";
 //import { Button } from "../components/ui/Button";
 import { House } from "lucide-react";
 import { ShoppingBag } from "lucide-react";
+import { UseGlobalState } from "../Context/Usercontext";
+import { useNavigate } from "react-router-dom";
 function Dashboard() {
   const [selectedPage, setselectedPage] = useState("home");
   const [sidebarOpen, setsidebarOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user } = UseGlobalState();
+  if (user.role !== "Admin") return navigate("/");
   const RpageContent = () => {
     switch (selectedPage) {
       case "home":
