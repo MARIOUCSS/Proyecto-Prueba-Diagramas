@@ -101,7 +101,10 @@ const newOrderCO = async (req, res) => {
   } catch (error) {}
 };
 const getAllorders = async (req, res) => {
-  const orders = await Order.find({ user: req.user._id });
+  const orders = await Order.find({ user: req.user._id }).populate(
+    "user",
+    " email"
+  );
   if (!orders) {
     return res.status(400).send({ message: "there is no order" });
   }
